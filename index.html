@@ -187,9 +187,10 @@
 
         function clearResults() {
             localStorage.removeItem('results');
-            localStorage.removeItem('guesses');
-            localStorage.removeItem('beginDate');
+            localStorage.removeItem('guesses');            
             localStorage.removeItem('guessCount');
+			localStorage.removeItem('beginDate');
+			localStorage.removeItem('toDate');
             document.getElementById('results').innerText = '';
             document.getElementById('guesses').innerText = '';
             document.getElementById('matches').innerText = '';
@@ -200,24 +201,30 @@
         }
 
 		function updateStoreDates(){
-			if (beginDate) {                
-                const dateStored = new Date(beginDate);                
-				const formattedDate = (dateStored.getFullYear()% 100) + '/' + 
-									  String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
-									  String(dateStored.getDate()).padStart(2, '0') + ' ' + 
-									  String(dateStored.getHours()).padStart(2, '0') + ':' + 
-									  String(dateStored.getMinutes()).padStart(2, '0');
-				document.getElementById('lastGeneratedDate').innerText = '' + formattedDate;
-				
-				if (toDate) {                
-					const dateStored = new Date(toDate);                					  
-					const formattedDate = String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
+			if (guessCount === 0){
+				document.getElementById('lastGeneratedDate').innerText = '';
+			}
+			else
+			{
+				if (beginDate) {                
+					const dateStored = new Date(beginDate);                
+					const formattedDate = (dateStored.getFullYear()% 100) + '/' + 
+										  String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
 										  String(dateStored.getDate()).padStart(2, '0') + ' ' + 
 										  String(dateStored.getHours()).padStart(2, '0') + ':' + 
 										  String(dateStored.getMinutes()).padStart(2, '0');
-					document.getElementById('lastGeneratedDate').innerText = document.getElementById('lastGeneratedDate').innerText + ' to ' + formattedDate;
+					document.getElementById('lastGeneratedDate').innerText = '' + formattedDate;
+					
+					if (toDate) {                
+						const dateStored = new Date(toDate);                					  
+						const formattedDate = String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
+											  String(dateStored.getDate()).padStart(2, '0') + ' ' + 
+											  String(dateStored.getHours()).padStart(2, '0') + ':' + 
+											  String(dateStored.getMinutes()).padStart(2, '0');
+						document.getElementById('lastGeneratedDate').innerText = document.getElementById('lastGeneratedDate').innerText + ' to ' + formattedDate;
+					}
 				}
-            }
+			}
 		}
         function checkStoredResults() {
             const beginDate = localStorage.getItem('beginDate');
