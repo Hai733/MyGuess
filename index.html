@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Number Generator</title>
+    <style>
+        body {
+            text-align: center; /* Center align everything within the body */
+            margin-top: 50px; /* Add some top margin for spacing */
+        }
+        #generateButtonContainer {
+            margin-top: 20px; /* Adjust top margin for the container */
+        }
+        #generateButton {
+            display: inline-block; /* Ensure button stays on the same line */
+            margin-top: 10px; /* Add space between the button and text */
+            visibility: visible; /* Default state is visible */
+            opacity: 1; /* Fully opaque */
+            transition: opacity 0.3s ease; /* Smooth transition for opacity change */
+        }
+        .hidden {
+            visibility: hidden; /* Make the button invisible */
+            opacity: 0; /* Make the button fully transparent */
+        }
+        #guessButtons {
+            margin-top: 50px; /* Add space between Generate button and Guess buttons */
+            display: none;
+        }
+        #guessButtons button {
+            display: block; /* Ensure buttons are block elements */
+            margin: 10px auto; /* Center align with auto margins */
+        }
+        #clearButton {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+        }
+        #showButton, #hideButton {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+        }       
+        #guessCount {
+            color: #888; /* Gray color */
+            position: absolute; /* Absolute position to place it at the bottom center */
+            bottom: 0; /* Align to the bottom */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Offset to truly center */
+            margin-bottom: 10px; /* Add some bottom margin */
+        }
+        #lastGeneratedDate {
+            color: #888; /* Gray color */
+            position: absolute; /* Absolute position to place it at the bottom center */
+            bottom: 30px; /* Align to the bottom above guess count */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Offset to truly center */
+			margin-left: 10px; /* Add left margin */
+			margin-right: 10px; /* Add right margin */
+            margin-bottom: 10px; /* Add some bottom margin */
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">Random Number Generator</h1>    
+    <p id="randomNumber"></p>
+    <div id="generateButtonContainer">
+        <button id="generateButton" onclick="generateRandomNumber()">Generate Random Number</button>
+    </div>
+    <div id="guessButtons" style="display:none;">
+        <button onclick="storeGuess(0)" style="font-weight: normal; color: #888;">
+			You guess <span style="font-weight: bold; color: black;">0</span> 
+		</button>
+		<button onclick="storeGuess(1)" style="font-weight: normal; color: #888;">
+			You guess <span style="font-weight: bold; color: black;">1</span> 
+		</button>        
+    </div>
+    <button id="clearButton" onclick="clearResults()">Clear All Results</button>
+    <button id="showButton" style="display:block;" onclick="showResults()">Show All Results</button>
+    <button id="hideButton" style="display:none;" onclick="hideResults()">Hide All Results</button>
+    <p id="results"></p>
+    <p id="guesses"></p>
+    <p id="matches"></p>
+    <p id="guessCount">You have guessed 0 times</p>
+    <p id="lastGeneratedDate">date1 to date2</p>
+
+    <script>
+        let guessCount = 0;
+        let randomNumber = -1;
+		let beginDate = new Date();
+		let toDate = new Date();
+
+        function generateRandomNumber() {
+            // Generate a random number (0 or 1)
+            randomNumber = Math.floor(Math.random() * 2);                                      
+
+            // Hide all the results
+            document.getElementById('results').innerText = '';
+            document.getElementById('guesses').innerText = '';
+            document.getElementById('matches').innerText = '';
+            
+			// Show the guess buttons and hide other buttons
+            document.getElementById('guessButtons').style.display = 'block';            
+            document.getElementById('clearButton').classList.add('hidden');
+            document.getElementById('showButton').classList.add('hidden');
+            document.getElementById('hideButton').classList.add('hidden');
+			document.getElementById('generateButton').classList.add('hidden');
+        }
+
+        function storeGuess(guess) {
+			toDate = new Date();
+			
+            // Store the guess in localStorage
+            let guesses = JSON.parse(localStorage.getItem('guesses')) || [];
+            guesses.push(guess);
+            localStorage.setItem('guesses', JSON.stringify(guesses));
+            
+            // Store the random number and dates in localStorage
+            let results = JSON.parse(localStorage.getItem('results')) || [];
+            results.push(randomNumber);
+            localStorage.setItem('results', JSON.stringify(results));            
+			localStorage.setItem('toDate', toDate.toISOString());
+			if (guessCount === 0 ){
+				beginDate = new Date();
+				localStorage.setItem('beginDate', beginDate.toISOString());
+			}
+			updateStoreDates();
+            			
+            // Update and store the guess count
+            guessCount++;
+            localStorage.setItem('guessCount', guessCount);
+            document.getElementById('guessCount').innerText = 'You have guessed ' + guessCount + ' times';
+
+            // Hide the guess buttons and show other buttons
+            document.getElementById('guessButtons').style.display = 'none';
+            document.getElementById('generateButton').classList.remove('hidden');
+            document.getElementById('clearButton').classList.remove('hidden');
+            document.getElementById('showButton').classList.remove('hidden');
+            document.getElementById('hideButton').classList.remove('hidden');
+            
+            // Clear the random number display
+            document.getElementById('randomNumber').innerText = '';          
+        }
+
+        function displayResults() {
+            const results = JSON.parse(localStorage.getItem('results')) || [];
+            document.getElementById('results').innerText = 'PC: ' + results.join(', ');
+        }
+
+        function displayGuesses() {
+            const guesses = JSON.parse(localStorage.getItem('guesses')) || [];
+            document.getElementById('guesses').innerText = 'Me: ' + guesses.join(', ');
+        }
+
+        function displayMatching(){
+            const matches = countMatches();
+            document.getElementById('matches').innerText = 'Number of matching: ' + matches; 
+        }
+        
+        function countMatches() {
+            const results = JSON.parse(localStorage.getItem('results')) || [];
+            const guesses = JSON.parse(localStorage.getItem('guesses')) || [];
+            
+            let matches = 0;
+            for (let i = 0; i < Math.min(results.length, guesses.length); i++) {
+                if (results[i] === guesses[i]) {
+                    matches++;
+                }
+            }
+            return matches;
+        }
+        
+        function showResults(){                       
+            document.getElementById('hideButton').style.display = 'block';
+            document.getElementById('showButton').style.display = 'none';
+            //
+            displayResults();
+            displayGuesses();
+            displayMatching();
+        }       
+
+        function hideResults() {
+            document.getElementById('results').innerText = '';
+            document.getElementById('guesses').innerText = '';
+            document.getElementById('matches').innerText = '';
+            document.getElementById('hideButton').style.display = 'none';
+            document.getElementById('showButton').style.display = 'block';
+        }
+
+        function clearResults() {
+            localStorage.removeItem('results');
+            localStorage.removeItem('guesses');
+            localStorage.removeItem('beginDate');
+            localStorage.removeItem('guessCount');
+            document.getElementById('results').innerText = '';
+            document.getElementById('guesses').innerText = '';
+            document.getElementById('matches').innerText = '';
+            document.getElementById('randomNumber').innerText = '';          
+            guessCount = 0;
+            document.getElementById('guessCount').innerText = 'You have guessed 0 times';
+            document.getElementById('lastGeneratedDate').innerText = '';
+        }
+
+		function updateStoreDates(){
+			if (beginDate) {                
+                const dateStored = new Date(beginDate);                
+				const formattedDate = (dateStored.getFullYear()% 100) + '/' + 
+									  String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
+									  String(dateStored.getDate()).padStart(2, '0') + ' ' + 
+									  String(dateStored.getHours()).padStart(2, '0') + ':' + 
+									  String(dateStored.getMinutes()).padStart(2, '0');
+				document.getElementById('lastGeneratedDate').innerText = '' + formattedDate;
+				
+				if (toDate) {                
+					const dateStored = new Date(toDate);                					  
+					const formattedDate = String(dateStored.getMonth() + 1).padStart(2, '0') + '/' + 
+										  String(dateStored.getDate()).padStart(2, '0') + ' ' + 
+										  String(dateStored.getHours()).padStart(2, '0') + ':' + 
+										  String(dateStored.getMinutes()).padStart(2, '0');
+					document.getElementById('lastGeneratedDate').innerText = document.getElementById('lastGeneratedDate').innerText + ' to ' + formattedDate;
+				}
+            }
+		}
+        function checkStoredResults() {
+            const beginDate = localStorage.getItem('beginDate');
+			const toDate = localStorage.getItem('toDate');
+            guessCount = parseInt(localStorage.getItem('guessCount')) || 0;
+            document.getElementById('guessCount').innerText = 'You have guessed ' + guessCount + ' times';
+            
+            updateStoreDates();						
+        }
+
+        // Check if there's a stored results array on page load
+        window.onload = checkStoredResults;
+    </script>
+</body>
+</html>
