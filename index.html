@@ -98,8 +98,8 @@
             I knew it's  <span style="font-weight: bold; color: black; font-size: 20px">1</span>
         </button>
     </div>
-    <button id="clearButton" onclick="clearResults()">Reset All</button>
-    <button id="showButton" style="display:block;" onclick="showResults()">Show Results</button>
+    <button id="clearButton" onclick="confirmClearResults()">Reset All</button>
+    <button id="showButton" style="display:block;" onclick="confirmShowResults()">Show Results</button>
     <button id="hideButton" style="display:none;" onclick="hideResults()">Hide Results</button>
     <p id="results"></p>
     <p id="guesses"></p>
@@ -260,7 +260,19 @@
 
             updateStoreDates();
         }
+		
+		function confirmClearResults() {
+            if (confirm("Are you sure you want to reset all data?")) {
+                clearResults();
+            }
+        }
 
+        function confirmShowResults() {
+            if (confirm("Are you sure you want to show results?")) {
+                showResults();
+            }
+        }
+		
         // Check if there's a stored results array on page load
         window.onload = checkStoredResults;
     </script>
